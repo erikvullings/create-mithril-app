@@ -118,13 +118,20 @@ async function main() {
 
   await cloneRepo(projectName);
 
+  // Convert application title to a valid npm package scope name
+  const npmPackageName = applicationTitle
+    .replace(/\s+/g, "-")
+    .replace(/['":;]/g, "")
+    .toLowerCase();
+
   const dictionary = new Map([
     ["MITHRIL-APP-SHORT", JSON.stringify(applicationShortTitle)],
     ["MITHRIL-APP", JSON.stringify(applicationTitle)],
-    ["mithril-app", applicationTitle.replace(/['":;]/g, "_").toLowerCase()],
+    ["mithril-app", npmPackageName],
     ["APPLICATION_DESCRIPTION", JSON.stringify(applicationDesc)],
     ["erikvullings", JSON.stringify(applicationDesc)],
-    ["65533", applicationPort],
+    ["65533", JSON.stringify(applicationPort)],
+    ["@mithril-app/shared", JSON.stringify(`@${npmPackageName}/shared`)],
   ]);
 
   await replaceWordsInFiles(projectName, dictionary);
