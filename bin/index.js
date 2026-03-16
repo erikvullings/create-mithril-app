@@ -39,10 +39,7 @@ async function replaceWordsInFiles(folderPath, dictionary) {
             console.error("Error getting file stats:", err);
             return;
           }
-          if (
-            stats.isFile() &&
-            (file.endsWith(".ts") || file.endsWith(".json"))
-          ) {
+          if (stats.isFile()) {
             fs.readFile(filePath, "utf8", (err, data) => {
               if (err) {
                 console.error("Error reading file:", err);
@@ -135,6 +132,35 @@ async function main() {
   ]);
 
   await replaceWordsInFiles(projectName, dictionary);
+
+  // Copy packages/gui/.env.example to packages/gui/.env with variable replacement
+  const envExamplePath = path.join(projectName, "packages/gui/.env.example");
+  const envPath = path.join(projectName, "packages/gui/.env");
+
+  if (fs.existsSync(envExamplePath)) {
+    fs.readFile(envExamplePath, "utf8", (err, data) => {
+      if (err) {
+        console.error("Error reading .env.example:", err);
+        return;
+      }
+
+      // Replace words in .env content using the dictionary
+      let replacedContent = data;
+      for (const [key, value] of dictionary.entries()) {
+        const regex = new RegExp("\\b" + key + "\\b", "g");
+        replacedContent = replacedContent.replace(regex, value);
+      }
+
+      fs.writeFile(envPath, replacedContent, "utf8", (err) => {
+        if (err) {
+          console.error("Error writing .env:", err);
+        } else {
+          console.log(`Created .env file at packages/gui/.env`);
+        }
+      });
+    });
+  }
+
   // Here you can write the logic to generate the Mithril app with the provided details
   // For demonstration purposes, let's just log a success message
   console.log("\nMithril app generated successfully!");
